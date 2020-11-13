@@ -1,0 +1,53 @@
+#This is in R
+
+- setwd("F:/Study/R Case Study/Case2")
+- cust <- read.csv("Customer Acqusition.csv")
+- spend <- read.csv("spend.csv")
+- repay <- read.csv("Repayment.csv")
+_________________________________________________________________
+- cust<-na.omit(cust)
+- cust<-subset(cust, select=-c(No))
+- spend<-subset(spend, select=-c(Sl.No.))
+- spend<-na.omit(spend)
+- spend$Month<-as.Date(spend$Month, "%d-%b-%y")
+- repay<-subset(repay, select=-c(SL.No.))
+- repay<-na.omit(repay)
+- repay$Month<-as.Date(repay$Month, "%d-%b-%y")
+
+1.a cust$Age[cust$Age<18]<-mean(cust$Age)
+1.b
+- cst<-merge(cust, spend, by.x = "Customer", by.y = "Customer")
+- ifelse(cst$Amount>cst$Limit, cst$Limit/2, cst$Amount)
+1.c
+- crt<-merge(cust, repay, by.x = "Customer", by.y = "Customer")
+- ifelse(crt$Amount>crt$Limit, crt$Limit, crt$Amount)
+
+2.a length(unique(cst$Customer)) || length(unique(crt$Customer)) ===100
+2.b length(unique(cst$Type)) ===15
+2.c 
+- csa<-cst %>% group_by(Customer, Month) %>% summarise(mean(Amount, na.rm=TRUE))
+- csa<-csa %>% rename('Amount' = 'mean(Amount, na.rm = TRUE)')
+- csa$spendMonth<-format(csa$Month, "%m")
+- avg_ms<-csa %>% group_by(Customer, spendMonth) %>% summarise(mean(Amount, na.rm=TRUE))
+2.d
+- cra<-crt %>% group_by(Customer, Month) %>% summarise(mean(Amount, na.rm=TRUE))
+- cra<-cra %>% rename('Amount' = 'mean(Amount, na.rm = TRUE)')
+- cra$repayMonth<-format(cra$Month, "%m")
+- avg_mr<-cra %>% group_by(Customer, repayMonth) %>% summarise(mean(Amount, na.rm=TRUE))
+2.e
+- amc<-merge(avg_ms, avg_mr, by.x = c("Customer","spendMonth"), by.y = c("Customer","repayMonth"))
+- amc <- amc %>% rename('Amount.y' = 'mean(Amount, na.rm = TRUE).y')
+- amc <- amc %>% rename('Amount.x' = 'mean(Amount, na.rm = TRUE).x')
+- amc$monthlyProfit <- amc$Amount.y-amc$Amount.x
+- amc$profit <- ifelse(amc$monthlyProfit>0, amc$monthlyProfit*0.029, NA)
+- head(amc, 20)
+
+2.f
+- tfp<-cst %>% group_by(Type) %>% summarise(sum(Amount))
+- tfp<-tfp %>% rename('Total' = 'sum(Amount)')
+- tfp[order(tfp$Total, decreasing=TRUE),]
+
+2.g
+- scm<-cst %>% group_by(City) %>% summarise(sum(Amount))
+- scm<-scm %>% rename('Total' = 'sum(Amount)')
+- scm[order(scm$Total, decreasing=TRUE),]
