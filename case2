@@ -1,0 +1,48 @@
+# solutions in alternative manner with base R
+
+- m1<-merge(cust, spend, by.x = "Customer", by.y = "Customer")
+- m2<-merge(m1, repay, by.x = "Sl.No.", by.y = "SL.No.")
+OR
+- m3<-merge(m1, repay, by.x = c("Sl.No.","Customer"), by.y = c("SL.No.","Customer"))
+- m3<-m3[order(m3$Sl.No.),]
+
+1.a for(i in m3$Sl.No.){if(m3$Age[i]<18){m3$Age[i]<-mean(m3$Age)}}
+1.b for(i in m3$Sl.No.){if(m3$Amount.x[i]<m2$Limit[i]){m3$Amount.x[i]<-m2$Limit[i]*0.5}}
+1.c for(i in m3$Sl.No.){if(m3$Amount.y[i]>m2$Limit[i]){m3$Amount.y[i]<-m2$Limit[i]}}
+
+2.a length(unique(m3$Customer)) ===100
+2.b length(unique(m3$Type)) ===15
+2.c
+- m3$Month.x<-as.Date(m3$Month.x, "%d-%b-%y")
+- sum(m3$Amount.x)/length(unique(format(m3$Month.x, "%b-%Y"))) ==12154802
+2.d
+- m3$Month.y<-as.Date(m3$Month.y, "%d-%b-%y")
+- sum(m3$Amount.y)/length(unique(format(m3$Month.y, "%b-%Y"))) ==12394503
+2.e
+- ams<-sum(m3$Amount.x)/length(unique(format(m3$Month.x, "%b-%Y")))
+- amr<-sum(m3$Amount.y)/length(unique(format(m3$Month.y, "%b-%Y")))
+- amp<-(amr-ams)*(2.9/100) ==6951.307
+2.f
+- test<-0
+- for (t in unique(m3$Type)) {test[t]<-(sum(m3[m3$Type==t, 12]))}
+- test<-sort(test)
+- tail(test,5)
+2.g
+- test<-0
+- for (t in unique(m3$City)) {test[t]<-(sum(m3[m3$City==t, 12]))}
+- max(test)
+OR
+- test<-sort(test)
+- tail(test,1)
+2.h
+- test<-data.frame(Age=numeric(),Expense=character(),stringsAsFactors=FALSE)
+- for (t in unique(m3$Age)) {
+sum<-sum(m3[m3$Age==t, 12])
+test[, c(t,sum)]}
+
+for (t in unique(m3$Age)) {
+test[i]<-c(t,sum(m3[m3$Age==t, 12]))
+i++
+}
+
+for (t in unique(m3$Age)) {test<-c(t,sum(m3[m3$Age==t, 12]))}
